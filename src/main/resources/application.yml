@@ -1,10 +1,16 @@
 spring:
+  datasource: #메모리에 임시 DB 만듦
+    url: jdbc:h2:mem:testdb
+  h2:
+    console:
+      enabled: true # 웹 콘솔 활성화
+      path: /h2-console
   jpa:
     # 전송 쿼리 확인
-    show-sql: true
+    show-sql: true  # 실행되는 SQL 콘솔에 출력
     properties:
       hibernate:
-        format_sql: true
+        format_sql: true #SQL 줄바꿈해서 보기 좋게 출력
 
     # 테이블 생성 후에 data.sql 실행
     defer-datasource-initialization: true
