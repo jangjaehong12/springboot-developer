@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor //new UpdateArticleRequest('title','content');
+@AllArgsConstructor // new UpdateArticleRequest('title', 'content');
 @NoArgsConstructor // new UpdateArticleRequest();
 @Getter // updateArticleRequest.getContent();
 public class UpdateArticleRequest {

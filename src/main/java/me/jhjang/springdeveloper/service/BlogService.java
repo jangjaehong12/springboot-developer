@@ -15,8 +15,8 @@ import java.util.List;
 public class BlogService {
     private final BlogRepository blogRepository;
 
-    public Article save(AddArticleRequest addArticleRequest) {
-        return blogRepository.save(addArticleRequest.toEntity());
+    public Article save(AddArticleRequest articleRequest){
+        return blogRepository.save(articleRequest.toEntity());
     }
 
     public List<Article> findAll() {
@@ -24,8 +24,7 @@ public class BlogService {
     }
 
     public Article findById(long id) {
-        return blogRepository.findById(id)
-                .orElseThrow(() -> new IllegalAccessError("not found: " + id));
+        return blogRepository.findById(id).orElseThrow(()->new IllegalArgumentException("not found:" +id));
     }
 
     public void delete(long id) {
@@ -34,10 +33,8 @@ public class BlogService {
 
     @Transactional
     public Article update(long id, UpdateArticleRequest request) {
-        Article article = blogRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
-        article.update(request.getTitle(),request.getContent());
+        Article article = blogRepository.findById(id).orElseThrow(()->new IllegalArgumentException("not found: "+ id));
+        article.update(request.getTitle(), request.getContent());
         return article;
-
     }
 }

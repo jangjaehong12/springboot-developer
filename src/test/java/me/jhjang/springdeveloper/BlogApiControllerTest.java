@@ -29,30 +29,28 @@ public class BlogApiControllerTest {
     protected MockMvc mockMvc;
 
     @Autowired
-    protected ObjectMapper objectMapper; //객체 -> json 문자열 변환
+    protected ObjectMapper objectMapper; // 객체를 -> JSON 문자열로 변환
 
     @Autowired
-    private BlogRepository blogRepository;
+    protected BlogRepository blogRepository;
 
-    @BeforeEach
-    public void cleanUp() {
+    @BeforeEach // ✅ 테스트 실행 전마다 DB를 비워주는 설정 추가
+    public void deleteAll() {
         blogRepository.deleteAll();
     }
 
-    @DisplayName("addArticle: 블로그 글 추가에 성공한다.")
+    @DisplayName("addArticle: 블로그 글 추가에 성공한다. ")
     @Test
-    public void addArticle() throws Exception{
+    public void addArticle() throws Exception {
         //given
         final String url = "/api/articles";
         final String title = "테스트";
-        final String content = "블로그 글 첫번째 입니다";
+        final String content = "블로그 글 첫 번째 입니다.";
         final AddArticleRequest article = new AddArticleRequest(title, content);
         final String requestBody = objectMapper.writeValueAsString(article);
 
         //when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestBody)); //Http Request 보내는 것을 흉내냄
+        ResultActions result = mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON_VALUE).content(requestBody)); // Http Request 보내준다
 
         //then
         result.andExpect(status().isCreated());
@@ -64,51 +62,46 @@ public class BlogApiControllerTest {
     @DisplayName("findAllArticles: 블로그 글 목록 조회에 성공한다.")
     @Test
     public void findAllArticles() throws Exception {
-        // given : 준비 단계 : 데이터를 하나 삽입
-        blogRepository.save(
-                Article.builder()
-                        .title("제목 1")
-                        .content("내용 1")
-                        .build()
-        );
-
+        //given: 데이터를 하나 삽입
+//        blogRepository.save(new Article("title", "content"));
         final String url = "/api/articles";
+        blogRepository.save(Article.builder().title("title").content("content").build());
 
-        // when : GET 방식으로 /api/articles 요청
-        final ResultActions resultActions = mockMvc.perform(
-                get(url).accept(MediaType.APPLICATION_JSON));
+        //when: get방식으로 /api/aricles
+        final ResultActions resultActions = mockMvc.perform(get(url).accept(MediaType.APPLICATION_JSON));
 
-        // then : status OK이고, 읽어온 데이터와 삽입한 데이터가 동일하다.
+        //then: status OK이고 읽어온 데이터의 내용이 내가 삽입한 내용과 동일하다.
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].content").value("내용 1"))
-                .andExpect(jsonPath("$[0].title").value("제목 1"));
+        .andExpect(jsonPath("$[0].content").value("content"))
+                .andExpect(jsonPath("$[0].title").value("title"));
     }
-    @DisplayName("findArticle: 블로그 글 조회에 성공한다.")
+
+    @DisplayName(" findArticle: 블로그 글 조회에 성공한다.")
     @Test
-    public void findByArticle() throws Exception{
-        //given (데이터 준비 : 블로그 글 하나 생성)
-        final String url = "/api/articles/{id}";
-        final String title = "블로그 글 제목";
-        final String content = "블로그 내용";
+    public void findArticle() throws Exception {
+        //given
+        final String url  = "/api/articles/{id}";
+        final String title  = "블로그 제목";
+        final String content  = "블로그 내용";
 
         Article savedArticle = blogRepository.save(Article.builder().title(title).content(content).build());
-        // when (실행: 위에서 생성된 블로그 글 조회)
-        final ResultActions resultActions = mockMvc.perform(
-                get(url, savedArticle.getId())
-                        .accept(MediaType.APPLICATION_JSON)
-        );
-        //then (검증: status가 200이고 조회한 블로그 글 제목과 내용이 위에서 삽입한 그것과 동일한지 확인
+
+        //when
+        final ResultActions resultActions = mockMvc.perform(get(url, savedArticle.getId()));
+
+        //then
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value(title))
+                .andExpect(jsonPath("$.title").value(title)) // ✅ $:title 을 $.title 로 수정
                 .andExpect(jsonPath("$.content").value(content));
     }
-    @DisplayName("deleteArticle: 블로그 글 삭제 성공한다")
+
+    @DisplayName("deleteArticle: 블로그 글 삭제에 성공한다")
     @Test
-    public void deleteArticle() throws Exception{
+    public  void deleteArticle() throws Exception {
         //given
         final String url = "/api/articles/{id}";
-        final String title = "4월 16일";
-        final String content = "백엔드 프로그래밍2 수업";
+        final String title = "4월 16일 내 생일";
+        final String content = "백엔드프로그래밍";
         Article savedArticle = blogRepository.save(Article.builder().title(title).content(content).build());
 
         //when
@@ -118,48 +111,29 @@ public class BlogApiControllerTest {
         List<Article> articles = blogRepository.findAll();
         assertThat(articles).isEmpty();
     }
-    @DisplayName("updateArticle: 블로그 글 수정 성공")
+
+    @DisplayName("updateArticle: 블로그 글 수정에 성공한다")
     @Test
-    public void updateArticle() throws  Exception{
-        //given 레코드 생성 , 변경내용 작성
+    public void updateArticle() throws Exception {
+        // given: 레코드 생성, 변경내용 작성
         final String url = "/api/articles/{id}";
-        final String title = "JUnit 제목";
-        final String content = "Junit 내용";
+        final String title = "title";
+        final String content = "content";
         Article savedArticle = blogRepository.save(Article.builder().title(title).content(content).build());
-        final String newTitle = "Junit에서 제목 변경";
-        final String newContent = "Junit에서 내용 변경";
+
+        final String newTitle = "JUnit에서 제목 변경";
+        final String newContent = "JUnit에서 내용 변경";
         UpdateArticleRequest request = new UpdateArticleRequest(newTitle, newContent);
-        //when /api/articles/생성된 레코드 id -> put 방식 요청
+
+        // when: /api/articels/생성된 레코드 id -> put 방식 요청
         ResultActions result = mockMvc.perform(put(url, savedArticle.getId())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(request)));
 
-        //then status code가 200, repository에서 변경된 내용 검증
+        // then: status code가 200, repository에서 변경된 내용 검증
         result.andExpect(status().isOk());
         Article article = blogRepository.findById(savedArticle.getId()).get();
         assertThat(article.getTitle()).isEqualTo(newTitle);
         assertThat(article.getContent()).isEqualTo(newContent);
     }
 }
-//      개인실습
-//    @DisplayName("블로그 글 목록 조회")
-//    @Test
-//    public void findAllArticles() throws Exception {
-//        // given
-//        blogRepository.save(new Article("제목1", "내용1"));
-//        blogRepository.save(new Article("제목2", "내용2"));
-//
-//        final String url = "/api/articles";
-//
-//        // when
-//        ResultActions result = mockMvc.perform(get(url)
-//                .accept(MediaType.APPLICATION_JSON));
-//
-//        // then
-//        result.andExpect(status().isOk())
-//                .andExpect(jsonPath("$.length()").value(2))
-//                .andExpect(jsonPath("$[0].title").value("제목1"))
-//                .andExpect(jsonPath("$[0].content").value("내용1"))
-//                .andExpect(jsonPath("$[1].title").value("제목2"))
-//                .andExpect(jsonPath("$[1].content").value("내용2"));
-//    }
