@@ -35,6 +35,10 @@
                 th:text="${article.content}">
         </textarea>
         </section>
+        <button th:if="${article.id} == null"
+                id="create-btn"
+                type="button"
+                class="btn btn-primary btn-sm">등록</button>
 
         <button th:if="${article.id} != null"
                 id="modify-btn"

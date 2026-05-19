@@ -20,7 +20,7 @@ public class BlogViewController {
     private final BlogService blogService;
 
     // 게시글 목록 뷰
-    @GetMapping("/article")
+    @GetMapping("/articles")
     public String getArticles(Model model) {
 
         List<ArticleResponse> articles =
@@ -38,7 +38,7 @@ public class BlogViewController {
     public String getArticle(@PathVariable Long id, Model model){
         Article article = blogService.findById(id);
         model.addAttribute("article",new ArticleViewResponse(article));
-        return "article";
+        return "articles";
     }
     @GetMapping("/new-article") // http://localhost:8080/new-article?id=1
     public String newArticle(@RequestParam(required = false) Long id, Model model) {
