@@ -23,6 +23,7 @@ public class WebSecurityConfig {
                 .requestMatchers(toH2Console())
                 .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/static/**"));
     }
+}
 
 
 
